@@ -182,7 +182,9 @@ jobs:
       - name: Download ggml model
         shell: cmd
         run: |
-          call models\download-ggml-model.cmd %MODEL%
+          cd models
+          call download-ggml-model.cmd %MODEL%
+          cd ..
           if not exist models\ggml-%MODEL%.bin ( echo ERROR: model download failed & exit /b 1 )
 
       - name: Download NPU encoder cache
@@ -190,7 +192,10 @@ jobs:
         run: |
           curl.exe -L --fail -o "models/ggml-$env:MODEL-encoder-vitisai.rai" `
             "https://huggingface.co/amd/whisper-$env:MODEL-onnx-npu/resolve/main/ggml-$env:MODEL-encoder-vitisai.rai"
-
+          $f = Get-Item "models/ggml-$env:MODEL-encoder-vitisai.rai"
+          Write-Host ".rai size: $([math]::Round($f.Length/1MB,2)) MB"
+          if ($f.Length -lt 1MB) { Write-Error ".rai suspiciously small - wrong URL or LFS pointer?"; exit 1 }
+          
       - name: Run NPU smoke test
         shell: cmd
         run: |
