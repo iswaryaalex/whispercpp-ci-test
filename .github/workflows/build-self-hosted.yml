@@ -275,12 +275,14 @@ jobs:
   # and destroys it afterwards. They run alongside the persistent-runner jobs
   # rather than replacing them, so the two can be compared run for run.
   #
-  # The `ephemeral` label is what keeps them apart: only the ephemeral pool
-  # carries it, so these jobs can never land on a persistent runner. In the
-  # other direction, the ephemeral pool is dropping `stx` and `rai300-400`
-  # (both deprecated in favour of `strix-halo`, removal 2026-10-01), after
-  # which the jobs above reach persistent runners only. Until that lands the
-  # two sets can overlap, so an early ephemeral result may show up under the
+  # The `devlab-dispatch` label is what keeps them apart: only the ephemeral
+  # pool carries it, so these jobs can never land on a persistent runner. It
+  # replaced `ephemeral`, which the pool retired -- a runner is ephemeral or it
+  # is not, which is a property of the host rather than something a workflow
+  # should have to ask for, and the pool needed a name that says "this job is
+  # opting in to DevLab" instead. `stx` and `rai300-400` are gone from the pool
+  # as well, in favour of `strix-halo`, so the persistent jobs above no longer
+  # overlap with these and an ephemeral result can no longer surface under a
   # persistent job name.
   #
   # When the persistent NPU runners are decommissioned, delete the two jobs
@@ -289,7 +291,7 @@ jobs:
   # ---------------------------------------------------------------------
 
   npu-amd-windows-ephemeral:
-    runs-on: [self-hosted, Windows, strix-halo, npu, ephemeral]
+    runs-on: [self-hosted, Windows, devlab-dispatch, strix-halo, npu]
     timeout-minutes: 60
     continue-on-error: true   # advisory: this pool is on trial, it must not gate a merge
 
@@ -384,7 +386,7 @@ jobs:
           path: vitisai.log
 
   npu-amd-linux-ephemeral:
-    runs-on: [self-hosted, Linux, strix-halo, npu, ephemeral]
+    runs-on: [self-hosted, Linux, devlab-dispatch, strix-halo, npu]
     timeout-minutes: 60
     continue-on-error: true   # advisory: this pool is on trial, it must not gate a merge
 
